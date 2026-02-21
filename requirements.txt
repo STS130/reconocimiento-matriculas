@@ -1,0 +1,5 @@
+ultralytics
+fast-plate-ocr[onnx]
+opencv-python
+numpy
+python-Levenshtein

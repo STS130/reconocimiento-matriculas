@@ -1,0 +1,7 @@
+path: data
+train: train/images
+val: val/images
+test: test/images
+
+names:
+  0: matricula
