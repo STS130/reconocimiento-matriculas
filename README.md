@@ -97,8 +97,8 @@ project/
 Clonar repositorio:
 
 ```bash
-git clone 
-cd 
+git clone https://github.com/STS130/reconocimiento-matriculas.git
+cd reconocimiento-matriculas
 ```
 
 Crear entorno virtual (Python 3.10/11 recomendado):
