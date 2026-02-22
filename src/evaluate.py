@@ -99,16 +99,20 @@ class Evaluador:
 
             imagen = cv2.imread(ruta_imagen)
 
-            altura, ancho = imagen.shape[:2]
+            altura, ancho = imagen.shape[:2] #Acá tomamos el ancho y alto de la imagen para luego poder convertir las coordenadas
 
             with open(ruta_label, 'r') as archivo:
+                # Las pasamos a coordenadas absolutas (x1, y1, x2, y2) para poder compararlas con las predicciones del modelo, que también están en formato absoluto. Para eso las multiplicamos por ancho y alto, y dividimos por dos (tenemos que dividir por dos porque las coordenadas del ground truth están en formato (x_center, y_center, width, height)
                 ground_truth = [[float(p[1])*ancho - float(p[3])*ancho/2, float(p[2])*altura - float(p[4])*altura/2,
-                       float(p[1])*ancho + float(p[3])*ancho/2, float(p[2])*altura + float(p[4])*altura/2]
-                      for p in [l.strip().split() for l in archivo] if len(p) >= 5]
-                
+                        float(p[1])*ancho + float(p[3])*ancho/2, float(p[2])*altura + float(p[4])*altura/2]
+                        #Acá, les sacamos los espacios para que queden así: [0, '0.5', '0.5', '0.2', '0.2']. 
+                        for p in [l.strip().split() for l in archivo] if len(p) >= 5]
+            
+            # Acá, obtenemos las predicciones del modelo para la imagen, y filtramos las cajas con una confianza mayor a 0.25. Luego, convertimos las coordenadas de las cajas a formato absoluto (x1, y1, x2, y2) para poder compararlas con las cajas de ground truth.
             predicciones = [[*box.xyxy[0].cpu().numpy()] for r in self.modelo(ruta_imagen, verbose=False)
                     for box in r.boxes if box.conf[0] > 0.25]
             
+            # Finalmente, para cada caja de predicción, calculamos la IoU con cada caja de ground truth, guardando la mejor IoU obtenida. Luego, calculamos la media de las mejores IoU obtenidas para todas las predicciones, devolviendo este valor como resultado.
             for p in predicciones:
                 mejor = max([self._iou(p, g) for g in ground_truth], default=0)
                 if mejor > 0:
